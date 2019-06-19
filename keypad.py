@@ -17,6 +17,7 @@ import Log
 import Queue
 
 
+
 def createKeypad(keyPressHandler):
 
   keys= [
@@ -34,6 +35,9 @@ def createKeypad(keyPressHandler):
 
 
 
+# base class for a keypad that arms/disarms the cameras (beta).
+# it connects to a 'dispatcher' and requests it to arm or disarm itself when the correct code is entered
+#  the dispatcher then forwards the command to all the surveillance cams (or whatever the devices are) to which it is connected 
 
 class ArmingKeypad(sensor.Listener):
 
@@ -305,6 +309,7 @@ class ArmingKeypad(sensor.Listener):
 
 
 #class ArmingKeypadWithSpeaker(ArmingKeypad): TODO
+
 class ArmingKeypadWithDisplay(ArmingKeypad):
 
     def __init__(self, config):

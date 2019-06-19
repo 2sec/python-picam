@@ -4,6 +4,9 @@ import time
 
 import Log
 
+# Config class. Values are stored as text in an .ini file in the current directory
+# the values can be changed while the program is running are the values are read in the background
+
 
 class Config(object):
     def __init__(self):

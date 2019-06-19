@@ -4,6 +4,9 @@ import collections
 
 import Log 
 
+# class that counts the number of frames per second
+# call Update() when a frame is generated, it will return the current rate
+
 class FPS(object):
 
     def __init__(self):

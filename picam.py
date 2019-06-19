@@ -9,7 +9,13 @@ import sensor
 import keypad
 
 
+# this is the main module. 
+# when launched, depending on the config, it will start a single surveillance cam (class Monitor), a keypad with a display, (class ArmingKeypadWithDisplay),
+# a controller (class Merger) or a combination
+
        
+# this class defines the configuration file and the configuration keys/values and their types
+
 class CamConfig(Config):
 
     def init(self):
@@ -17,15 +23,17 @@ class CamConfig(Config):
 
         self.getvalue('debug', False)
 
+        # the URL used to access the camera. should be changed to something else and kept 'secret' (as there's no authentication currently and it's in http...)
         self.getvalue('default_url', '/change_url')
         self.getvalue('default_http_port', 8080)
 
-
-        
-        self.getvalue('framerate', 15)
+        # lower the framerate if the network bandwith available is too low
+        self.getvalue('framerate', 15) 
         self.getvalue('resolution', (1640, 1232))
         self.getvalue('resize', 4) # effective resolution becomes (resolution / resize)
 
+        # round up to the nearest multiples
+        # this is needed as we access the camera frame buffer directly
         resolution = (self.resolution[0] / self.resize, self.resolution[1] / self.resize)
         resolution = (((resolution[0] + 31) // 32) * 32, ((resolution[1] + 15) // 16) * 16)
 
@@ -42,6 +50,7 @@ class CamConfig(Config):
 
         self.getvalue('alarm_recipient', '')
 
+        # monitor=True -> Monitor the local camera to detect movements
         self.getvalue('monitor', True)
         self.getvalue('monitor_port', self.default_http_port)
         self.getvalue('monitor_url', self.default_url)
@@ -54,20 +63,26 @@ class CamConfig(Config):
         self.getvalue('jpeg_quality', 60)
 
 
+        # dht22=True > there's a local DHT22 sensor 
         self.getvalue('dht22', False)
         self.getvalue('dht22_port', 6622)
         self.getvalue('dht22_url', self.default_url)
         self.getvalue('dht22_pin', 2)
 
+        # min temperature below which an alert is sent
         self.getvalue('min_temperature_celsius', 10)
+        # max humidity above which an alert is sent
         self.getvalue('max_relative_humidity', 80)
 
 
 
+        # merge_multiple_sources=True -> read remote cameras (in merger_sources: list of comma separated host:port) and merge them into a single image
         self.getvalue('merge_multiple_sources', False)
         self.getvalue('merger_sources', [''])
+        # merge_port: port on which the merged image is rendered
         self.getvalue('merger_port', 8100)
         self.getvalue('merger_url', self.default_url)
+        #num_colums: number of images per row
         self.getvalue('merger_num_columns', 3)
 
         self.getvalue('armed', False)
@@ -95,11 +110,13 @@ class CamConfig(Config):
 
 
 
+        # if the size exceeeds the given values the oldest files will be removed first
         config.getvalue('max_local_alarms_total_size', 5.0) # in GB. 0 means no cleaning
         config.getvalue('max_cloud_alarms_total_size', 1.0) # in GB. 0 means no cleaning
 
         config.getvalue('sendmail', True)
 
+        # set to True if there's a LED displayed connected to the local machine
         config.getvalue('ssd1306', False)
 
         config.getvalue('keypad', False)

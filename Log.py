@@ -11,6 +11,11 @@ import platform
 import sys
 
 
+# module used to log information
+# import Log, then call Log.Write(str)
+# prints on stdout and also outputs to a log file 
+# Call Log_Exception() to log exceptions with a stack trace
+
 
 import __main__
 name = __main__.__file__

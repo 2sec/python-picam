@@ -8,6 +8,8 @@ import re
 
 import Log
 
+#various helper functions are put here, and also StartThread() and SendMail(), see below
+
 # random init for all modules
 random_state = 1217
 os.environ['PYTHONHASHSEED'] = '0'
@@ -22,7 +24,7 @@ GPIO.setmode(GPIO.BCM)
 Log.Write('RPi %s' % str(GPIO.RPI_INFO))
 
 
-
+# this should be moved elsewhere
 GPIO.setup(18, GPIO.OUT)
 GPIO.output(18, True)
 #GPIO.output(18, False)
