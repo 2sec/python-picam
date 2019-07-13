@@ -180,4 +180,6 @@ while True: time.sleep(1000)
 # this proved not useful at all. rng-tools had to be installed to solve this problem
 # 2019-01-25 0.93 reworked the way sensors connect together
 # 2019-03-01 0.93b just added CPU temperature
-# 2019-07-19 0.93c add various camera settings
+# 2019-07-12 0.93c added various camera settings
+# 2019-07-13 0.93d small change for debugging purposes
+

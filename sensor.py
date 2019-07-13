@@ -294,6 +294,7 @@ class Sensor(Listener):
         Log.Write(request)
 
         if len(request) < 3: 
+            Log.Write('Invalid request')
             self.sleep()
             return False
 
@@ -301,6 +302,7 @@ class Sensor(Listener):
         #query = urlparse.parse_qs(url.query)
 
         if url.path != self.url:
+            Log.Write('Invalid request URL. %s != %s' % (url.path, self.url))
             self.sleep()
             return False
 
