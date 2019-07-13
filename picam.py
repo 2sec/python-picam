@@ -46,6 +46,12 @@ class CamConfig(Config):
         self.getvalue('rotation', 0)
 
         self.getvalue('iso', 0)
+        self.getvalue('shutter_speed', 0)
+        self.getvalue('brightness', 50)
+        self.getvalue('exposure_mode', 'auto')
+        self.getvalue('contrast', 0)
+        self.getvalue('awb_mode', 'auto')
+        self.getvalue('awb_gains', (0.0, 0.0))
 
 
         self.getvalue('alarm_recipient', '')
@@ -99,7 +105,7 @@ class CamConfig(Config):
         config.getvalue('dropbox_upload', True)
         config.getvalue('save_alarms', True)
 
-        config.getvalue('gamma', 2.0)
+        config.getvalue('gamma', 1.0)
 
         config.getvalue('command_port', 8101)
         config.getvalue('dispatch_port', 8102)
@@ -122,7 +128,7 @@ class CamConfig(Config):
         config.getvalue('keypad', False)
         config.getvalue('secret_code', '0')
         
-        config.getvalue('version', '0.93b')
+        config.getvalue('version', '0.93c')
 
 
 
@@ -174,3 +180,4 @@ while True: time.sleep(1000)
 # this proved not useful at all. rng-tools had to be installed to solve this problem
 # 2019-01-25 0.93 reworked the way sensors connect together
 # 2019-03-01 0.93b just added CPU temperature
+# 2019-07-19 0.93c add various camera settings

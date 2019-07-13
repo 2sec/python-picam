@@ -378,7 +378,12 @@ class Camera(Sensor):
         camera = picamera.PiCamera(resolution = config.resolution, framerate = config.framerate)
 
         camera.iso = config.iso
-
+        camera.shutter_speed = config.shutter_speed
+        camera.brightness = config.brightness
+        camera.contrast = config.contrast
+        camera.exposure_mode = config.exposure_mode
+        camera.awb_mode = config.awb_mode
+        camera.awb_gains = 2.0
 
         self.camera = camera
 
@@ -389,7 +394,6 @@ class Camera(Sensor):
         self.rawFps = FPS()
 
         self.frame = None
-
 
 
 
