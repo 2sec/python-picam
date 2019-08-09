@@ -18,6 +18,8 @@ from datetime import datetime
 import psutil
 import os
 
+import RPi.GPIO as GPIO
+
 from fps import FPS
 
 
@@ -344,6 +346,7 @@ class Sensor(Listener):
         
         
 # humidity and temperature sensor
+# (VCC, data pin, unused, GND)
 class DHT22(Sensor):
     def __init__(self, config):
         super(DHT22, self).__init__(config, config.dht22_port, config.dht22_url)
@@ -351,9 +354,11 @@ class DHT22(Sensor):
 
         self.command_port = 0 # do not listen for commands
 
+        self.wait_time = 60
+
 
     def wait(self):
-        time.sleep(60)
+        time.sleep(self.wait_time)
 
     def read(self):
         # TODO verify CPU usage
@@ -369,6 +374,33 @@ class DHT22(Sensor):
     def __str__(self):
         return 'rh %.01f | tc %.01f' % self.data
 
+
+
+# Hall effect sensor
+# (VCC, GND, data pin)
+class Hall(Sensor):
+    def __init__(self, config):
+        super(Hall, self).__init__(config, config.hall_port, config.hall_url)
+        self.event = threading.Event()
+        self.pin = config.hall_pin
+
+        self.command_port = 0 # do not listen for commands
+
+    def start(self):
+        GPIO.setup(self.pin , GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+        def callback(channel):
+            self.data = str(1-GPIO.input(channel))
+            self.event.set()
+
+        GPIO.add_event_detect(self.pin, GPIO.BOTH, callback=callback, bouncetime=10)
+        
+    def wait(self):
+        self.event.wait()
+        self.event.clear()
+
+    def read(self):
+        return True
 
 
 # this class will output grayscale images from the PI Camera at the specified framerate and resolution
@@ -506,7 +538,7 @@ class Monitor(Camera):
 
         self.ssd1306 = None
         if config.ssd1306:
-            self.ssd1306 = SSD1306.Monitor()
+            self.ssd1306 = SSD1306.Display()
 
         self.cpu = 0
         self.mem = 0

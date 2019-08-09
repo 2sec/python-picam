@@ -80,6 +80,12 @@ class CamConfig(Config):
         # max humidity above which an alert is sent
         self.getvalue('max_relative_humidity', 80)
 
+        # Hall effect sensor
+        self.getvalue('hall_port', 6623)
+        self.getvalue('hall_url', self.default_url)
+        self.getvalue('hall_pin', 2)
+
+
 
 
         # merge_multiple_sources=True -> read remote cameras (in merger_sources: list of comma separated host:port) and merge them into a single image
@@ -94,22 +100,22 @@ class CamConfig(Config):
         self.getvalue('armed', False)
 
 
-        config.getvalue('smtp_server', 'smtp.gmail.com')
-        config.getvalue('smtp_port', '465')
-        config.getvalue('smtp_username', '')
-        config.getvalue('smtp_password', '')
+        self.getvalue('smtp_server', 'smtp.gmail.com')
+        self.getvalue('smtp_port', '465')
+        self.getvalue('smtp_username', '')
+        self.getvalue('smtp_password', '')
 
         # https://www.dropbox.com/developers/apps -> Create app (DropBox API, App folder, Name your app) -> then Generate Access Token
-        config.getvalue('dropbox_key', '')  
+        self.getvalue('dropbox_key', '')  
 
-        config.getvalue('dropbox_upload', True)
-        config.getvalue('save_alarms', True)
+        self.getvalue('dropbox_upload', True)
+        self.getvalue('save_alarms', True)
 
-        config.getvalue('gamma', 1.0)
+        self.getvalue('gamma', 1.0)
 
-        config.getvalue('command_port', 8101)
-        config.getvalue('dispatch_port', 8102)
-        config.getvalue('dispatcher_addr', '')
+        self.getvalue('command_port', 8101)
+        self.getvalue('dispatch_port', 8102)
+        self.getvalue('dispatcher_addr', '')
         
         
 
@@ -117,18 +123,18 @@ class CamConfig(Config):
 
 
         # if the size exceeeds the given values the oldest files will be removed first
-        config.getvalue('max_local_alarms_total_size', 5.0) # in GB. 0 means no cleaning
-        config.getvalue('max_cloud_alarms_total_size', 1.0) # in GB. 0 means no cleaning
+        self.getvalue('max_local_alarms_total_size', 5.0) # in GB. 0 means no cleaning
+        self.getvalue('max_cloud_alarms_total_size', 1.0) # in GB. 0 means no cleaning
 
-        config.getvalue('sendmail', True)
+        self.getvalue('sendmail', True)
 
         # set to True if there's a LED displayed connected to the local machine
-        config.getvalue('ssd1306', False)
+        self.getvalue('ssd1306', False)
 
-        config.getvalue('keypad', False)
-        config.getvalue('secret_code', '0')
+        self.getvalue('keypad', False)
+        self.getvalue('secret_code', '0')
         
-        config.getvalue('version', '0.93c')
+        self.getvalue('version', '0.93d')
 
 
 
@@ -153,14 +159,9 @@ if __name__ == '__main__':
 
     if config.keypad:
         keypad.ArmingKeypadWithDisplay(config).Run()
-    
 
 
-
-
-
-
-while True: time.sleep(1000)
+    while True: time.sleep(1000)
 
 
 
@@ -182,4 +183,5 @@ while True: time.sleep(1000)
 # 2019-03-01 0.93b just added CPU temperature
 # 2019-07-12 0.93c added various camera settings
 # 2019-07-13 0.93d small change for debugging purposes
+# 2019-08-09 various changes related to me testing DHT22 sensors. also added Hall sensors
 
