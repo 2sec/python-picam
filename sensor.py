@@ -17,6 +17,7 @@ import socket
 from datetime import datetime
 import psutil
 import os
+import re
 
 import RPi.GPIO as GPIO
 
@@ -34,6 +35,8 @@ import collections
 import Adafruit_DHT
 import SSD1306
 
+import bme280
+import smbus2
 
 # super slow to load
 import dropbox
@@ -177,9 +180,12 @@ class Sensor(Listener):
 
             while True:
                 if self.log:
-                    Log.Write('%s reading' % self.Name)
+                    Log.Write('%s waiting' % self.Name)
 
                 self.wait()
+
+                if self.log:
+                    Log.Write('%s reading' % self.Name)
 
                 if not self.read():
                     continue
@@ -347,6 +353,7 @@ class Sensor(Listener):
         
 # humidity and temperature sensor
 # (VCC, data pin, unused, GND)
+# AVOID this device as it always eventually give false readings. The BME280 is much better
 class DHT22(Sensor):
     def __init__(self, config):
         super(DHT22, self).__init__(config, config.dht22_port, config.dht22_url)
@@ -355,13 +362,16 @@ class DHT22(Sensor):
         self.command_port = 0 # do not listen for commands
 
         self.wait_time = 60
+        self.data = (0, 0)
 
 
     def wait(self):
         time.sleep(self.wait_time)
 
+    def start(self):
+        GPIO.setup(self.config.dht22_pin , GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    
     def read(self):
-        # TODO verify CPU usage
         data = Adafruit_DHT.read(Adafruit_DHT.DHT22, self.config.dht22_pin)
         if data is None or type(data) != tuple or len(data) != 2 or data[0] is None or data[1] is None:
             return False
@@ -372,8 +382,107 @@ class DHT22(Sensor):
         return True
 
     def __str__(self):
-        return 'rh %.01f | tc %.01f' % self.data
+        return 'rh %.01f|tc %.01f' % self.data
 
+
+
+# humidity, pressure and temperature sensor
+# (VCC, GND, SCL, SDA)
+# note: other devices can be connected to the same GPIO pins (I2C: SCL and SDA) 
+# as long as they have different addresses on the bus
+class BME280(Sensor):
+    def __init__(self, config):
+        super(BME280, self).__init__(config, config.bme280_port, config.bme280_url)
+        self.log = False
+
+        self.command_port = 0 # do not listen for commands
+
+        self.wait_time = 10
+
+        self.data = (0, 0, 0)
+
+
+    def wait(self):
+        time.sleep(self.wait_time)
+
+    def start(self):
+        self.bus = smbus2.SMBus(1)
+        self.addr = self.config.bme280_addr
+        self.params = bme280.load_calibration_params(self.bus, self.addr)
+
+    def read(self):
+        try:
+            data = bme280.sample(self.bus, self.addr, self.params)
+
+            data = (data.humidity, data.temperature, data.pressure)
+
+            self.alarm = data[1] > self.config.max_relative_humidity or data[0] < self.config.min_temperature_celsius
+                
+            self.data = data
+        except IOError as e:
+            Log.Write(e)
+            return False
+
+        return True
+
+    def __str__(self):
+        return 'rh %.01f|tc %.01f|hpa %u' % self.data
+
+
+
+# DS18B20 waterproof temperature sensor
+# (GND=black, data=yellow, VCC=red)
+# sudo nano /boot/config.txt, then add: dtoverlay=w1-gpio-pullup,gpiopin=X
+# connect the sensor, the 4K7 resistor between data and VCC (won't work without it), reboot
+# check: lsmod | grep w1
+# should ouput something like: wire ... w1_gpio,w1_therm
+# if needed:
+# sudo modprobe w1_gpio
+# sudo modprobe w1_therm
+# cd /sys/bus/w1/devices, check for any 28-* directory, the sensor can be read by reading the w1_slave file
+class DS18B20(Sensor):
+    def __init__(self, config):
+        super(DS18B20, self).__init__(config, config.ds18b20_port, config.ds18b20_url)
+        self.log = False
+
+        self.command_port = 0 # do not listen for commands
+
+        self.wait_time = 10
+        
+        self.data = (0,)
+
+
+    def wait(self):
+        time.sleep(self.wait_time)
+
+    def start(self):
+        self.path = None
+
+        path = '/sys/bus/w1/devices/'
+        for f in os.listdir(path):
+            if f.startswith('28-'):
+                self.path = path + f + '/w1_slave'
+
+    def read(self):
+        if self.path is None: return False
+        try:
+            lines = open(self.path).read().split('\n')
+            # example:
+            # ['44 01 4b 46 7f ff 0c 10 a9 : crc=a9 YES', '44 01 4b 46 7f ff 0c 10 a9 t=20250', '']
+            tc = re.findall('t=[0-9]+', lines[1])
+            tc = tc[0]
+            tc = tc[2:]
+            tc = float(tc)
+            tc = tc / 1000
+            self.data = (tc,)
+        except:
+            return False
+    
+        return True
+
+    def __str__(self):
+        if self.data is None: return ''
+        return 'tc %.01f ' % self.data
 
 
 # Hall effect sensor

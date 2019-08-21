@@ -8,6 +8,7 @@ import keypad
 import SSD1306
 import picam
 import Log
+import utils
 
 
 config = picam.CamConfig()
@@ -22,30 +23,32 @@ dht22.log = True
 #dht22.wait_time = 10
 dht22.Run()
 
+bme = sensor.BME280(config)
+bme.log = True
+bme.Run()
+
 hall = sensor.Hall(config)
+hall.log = True
 hall.Run()
+
+ds18 = sensor.DS18B20(config)
+ds18.log = True
+ds18.Run()
 
 display =  SSD1306.Display()
 
 Log.Write('starting..')
 
-tc = rh = mag = 0
-
-
 while True: 
-    time.sleep(1)
+    time.sleep(0.1)
 
-    if dht22.data:
-        data = dht22.data
-        tc = data[0]
-        rh = data[1]
-
-    mag = hall.data
-    
     display.Clear()
-    display.PutLine('%.02f%c' % (rh, chr(176)))
-    display.PutLine('%.02f%%' % tc)
-    display.PutLine('%s' % str(mag))
+    #dt = utils.ShortDateTime()
+    #display.PutLine(dt)
+    display.PutLine(str(dht22))
+    display.PutLine(str(bme))
+    display.PutLine(str(ds18))
+
     display.Display()
 
 

@@ -85,7 +85,13 @@ class CamConfig(Config):
         self.getvalue('hall_url', self.default_url)
         self.getvalue('hall_pin', 2)
 
+        # BME280 sensor
+        self.getvalue('bme280_port', 6624)
+        self.getvalue('bme280_url', self.default_url)
+        self.getvalue('bme280_addr', 0x76)
 
+        self.getvalue('ds18b20_port', 6625)
+        self.getvalue('ds18b20_url', self.default_url)
 
 
         # merge_multiple_sources=True -> read remote cameras (in merger_sources: list of comma separated host:port) and merge them into a single image
@@ -123,7 +129,7 @@ class CamConfig(Config):
 
 
         # if the size exceeeds the given values the oldest files will be removed first
-        self.getvalue('max_local_alarms_total_size', 5.0) # in GB. 0 means no cleaning
+        self.getvalue('max_local_alarms_total_size', 2.0) # in GB. 0 means no cleaning
         self.getvalue('max_cloud_alarms_total_size', 1.0) # in GB. 0 means no cleaning
 
         self.getvalue('sendmail', True)
@@ -134,7 +140,7 @@ class CamConfig(Config):
         self.getvalue('keypad', False)
         self.getvalue('secret_code', '0')
         
-        self.getvalue('version', '0.93d')
+        self.getvalue('version', '0.93e')
 
 
 
@@ -183,5 +189,6 @@ if __name__ == '__main__':
 # 2019-03-01 0.93b just added CPU temperature
 # 2019-07-12 0.93c added various camera settings
 # 2019-07-13 0.93d small change for debugging purposes
-# 2019-08-09 various changes related to me testing DHT22 sensors. also added Hall sensors
+# 2019-08-09 0.93e various changes related to me testing DHT22 sensors. also added Hall sensors
+# 2019-08-21 0.93f added the BME280 and DS18B20 sensors
 
